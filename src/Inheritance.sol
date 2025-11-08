@@ -8,6 +8,10 @@ contract Inheritance is Ownable {
     error ZeroAddressNotAllowedForHeir();
     error CannotBeOwnHeir();
     error MismatchAmount();
+    error EmptyHeir();
+    error SameHeir();
+    error InsufficientAmountInInheritance();
+    error WithdrawFailed();
 
     event InheritanceCreated(address indexed owner, address indexed heir, uint256 amount);
     event InheritanceIncreased(address indexed owner, uint256 amount, uint256 newTotal);
@@ -39,8 +43,8 @@ contract Inheritance is Ownable {
     }
 
     function updateHeir(address _newHeir) public onlyOwner {
-        require(_newHeir != address(0), "Heir cannot be empty");
-        require(_newHeir != heir, "New heir is same as current heir");
+        if(_newHeir == address(0)) revert EmptyHeir();
+        if(_newHeir == heir) revert SameHeir();
         address previousHeir = heir;
         heir = _newHeir;
         lastInteractedAt = block.timestamp;
@@ -48,12 +52,12 @@ contract Inheritance is Ownable {
     }
 
     function withdrawAndResetCounter(uint256 amount) public onlyOwner {
-        require(inheritanceAmount >= amount, "Insufficient amount stored in inheritance");
+        if(inheritanceAmount < amount) revert InsufficientAmountInInheritance();
         lastInteractedAt = block.timestamp;
         uint256 prevAmount = inheritanceAmount;
         inheritanceAmount -= amount;
         (bool success, ) = (msg.sender).call{value: amount}("");
-        require(success, "Withdraw call failed");
+        if(!success) revert WithdrawFailed();
         emit WithdrawalMade(msg.sender, prevAmount, inheritanceAmount);
     }
 
@@ -67,6 +71,7 @@ contract Inheritance is Ownable {
         require(elapsed >= monthDuration, "A month has not passed yet");
         transferOwnership(heir);
         heir = _newHeir;
+        lastInteractedAt = block.timestamp;
         emit TakeOverAfterAMonth(prevOwner, owner(), heir);
     }
 
@@ -85,7 +90,9 @@ contract Inheritance is Ownable {
 }
 
 /*
-    Does the contract need to save inheritance for one user or multiple users
-    Can the user increase the inheritance amount
-    Can the owner change the heir value
+    Does the contract need to save inheritance for one user or multiple users in a single contract?
+    Can the owner increase the inheritance amount after deploying the contract?
+    Can people other than the owner increase the inheritance amount?
+    Can the owner change the heir after it has been set?
+    Can the original owner withdraw inheritance if 30 days are up but the heir has not yet claimed ownership? If yes, then will the interactedAt time be updated or will it remain expired? -- rn yes
 */
