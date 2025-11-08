@@ -37,6 +37,11 @@ contract UpdateHeirInheritanceTest is Test {
         inheritance.updateHeir(firstHeir);
     }
 
+    function test_ownerCannotBeHeir() public {
+        vm.expectRevert(Inheritance.CannotBeOwnHeir.selector);
+        inheritance.updateHeir(address(this));
+    }
+
     function test_updateHeirAndEmit() public {
         assertEq(inheritance.owner(), address(this));
         assertEq(inheritance.heir(), firstHeir);

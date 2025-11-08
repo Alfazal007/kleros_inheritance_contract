@@ -12,6 +12,8 @@ contract Inheritance is Ownable {
     error SameHeir();
     error InsufficientAmountInInheritance();
     error WithdrawFailed();
+    error CallerCanOnlyBeHeir();
+    error MonthTimeNotElapsedYet();
 
     event InheritanceCreated(address indexed owner, address indexed heir, uint256 amount);
     event InheritanceIncreased(address indexed owner, uint256 amount, uint256 newTotal);
@@ -45,30 +47,31 @@ contract Inheritance is Ownable {
     function updateHeir(address _newHeir) public onlyOwner {
         if(_newHeir == address(0)) revert EmptyHeir();
         if(_newHeir == heir) revert SameHeir();
+        if(_newHeir == owner()) revert CannotBeOwnHeir();
         address previousHeir = heir;
         heir = _newHeir;
         lastInteractedAt = block.timestamp;
         emit HeirUpdated(msg.sender, previousHeir, heir);
     }
 
-    function withdrawAndResetCounter(uint256 amount) public onlyOwner {
-        if(inheritanceAmount < amount) revert InsufficientAmountInInheritance();
+    function withdrawAndResetCounter(uint256 _amount) public onlyOwner {
+        if(inheritanceAmount < _amount) revert InsufficientAmountInInheritance();
         lastInteractedAt = block.timestamp;
         uint256 prevAmount = inheritanceAmount;
-        inheritanceAmount -= amount;
-        (bool success, ) = (msg.sender).call{value: amount}("");
+        inheritanceAmount -= _amount;
+        (bool success, ) = (msg.sender).call{value: _amount}("");
         if(!success) revert WithdrawFailed();
         emit WithdrawalMade(msg.sender, prevAmount, inheritanceAmount);
     }
 
     function takeOverAfterAMonth(address _newHeir) public {
-        require(msg.sender == heir, "Only heir can call this function");
-        require(_newHeir != address(0), "Heir cannot be empty");
-        require(msg.sender != _newHeir, "You cannot be your own heir");
+        if(msg.sender != heir) revert CallerCanOnlyBeHeir();
+        if(_newHeir == address(0)) revert EmptyHeir();
+        if(msg.sender == _newHeir) revert CannotBeOwnHeir();
         address prevOwner = owner();
         uint256 monthDuration = 30 days;
         uint256 elapsed = block.timestamp - lastInteractedAt;
-        require(elapsed >= monthDuration, "A month has not passed yet");
+        if(elapsed < monthDuration) revert MonthTimeNotElapsedYet();
         transferOwnership(heir);
         heir = _newHeir;
         lastInteractedAt = block.timestamp;

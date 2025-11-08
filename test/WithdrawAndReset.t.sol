@@ -70,6 +70,29 @@ contract WithdrawAndResetTest is Test {
         assertEq(remainingTimeToClaim, 30 days);
     }
 
+    function test_TestEventAndWithdrawalWithWithdrawZeroAmount() public {
+        uint256 prevBalance = address(this).balance;
+        assertEq(inheritance.inheritanceAmount(), 10 ether);
+        vm.expectEmit(true, false, false, true);
+        emit Inheritance.WithdrawalMade(address(this), 10 ether, 10 ether);
+        inheritance.withdrawAndResetCounter(0);
+        assertEq(inheritance.inheritanceAmount(), 10 ether);
+        assertEq(address(inheritance).balance, 10 ether);
+        assertEq(address(this).balance, prevBalance);
+    }
+
+    function test_blockTimeUpdatesForZeroWithdrawal() public {
+        uint256 remainingTimeToClaim = inheritance.getRemainingTimeUntilClaim();
+        assertEq(remainingTimeToClaim, 30 days);
+        uint256 start = block.timestamp;
+        vm.warp(start + 15 days);
+        remainingTimeToClaim = inheritance.getRemainingTimeUntilClaim();
+        assertEq(remainingTimeToClaim, 15 days);
+        inheritance.withdrawAndResetCounter(0);
+        remainingTimeToClaim = inheritance.getRemainingTimeUntilClaim();
+        assertEq(remainingTimeToClaim, 30 days);
+    }
+
     // this is required to receive the eth as this is a contract account and not an eoa
     receive() external payable {}
 }
