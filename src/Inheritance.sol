@@ -14,6 +14,7 @@ contract Inheritance is Ownable {
     error WithdrawFailed();
     error CallerCanOnlyBeHeir();
     error MonthTimeNotElapsedYet();
+    error RejectUnknownExternalPayment();
 
     event InheritanceCreated(address indexed owner, address indexed heir, uint256 amount);
     event InheritanceIncreased(address indexed owner, uint256 amount, uint256 newTotal);
@@ -72,7 +73,7 @@ contract Inheritance is Ownable {
         uint256 monthDuration = 30 days;
         uint256 elapsed = block.timestamp - lastInteractedAt;
         if(elapsed < monthDuration) revert MonthTimeNotElapsedYet();
-        transferOwnership(heir);
+        _transferOwnership(heir);
         heir = _newHeir;
         lastInteractedAt = block.timestamp;
         emit TakeOverAfterAMonth(prevOwner, owner(), heir);
@@ -88,14 +89,7 @@ contract Inheritance is Ownable {
     }
 
     receive() external payable {
-        revert("Direct transfers not allowed");
+        revert RejectUnknownExternalPayment();
     }
 }
 
-/*
-    Does the contract need to save inheritance for one user or multiple users in a single contract?
-    Can the owner increase the inheritance amount after deploying the contract?
-    Can people other than the owner increase the inheritance amount?
-    Can the owner change the heir after it has been set?
-    Can the original owner withdraw inheritance if 30 days are up but the heir has not yet claimed ownership? If yes, then will the interactedAt time be updated or will it remain expired? -- rn yes
-*/
