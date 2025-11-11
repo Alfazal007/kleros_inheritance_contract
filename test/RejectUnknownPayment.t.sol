@@ -11,7 +11,7 @@ contract RejectUnknownPaymentTest is Test {
     address public firstHeir = 0x76eF1456aF7D8335dFf0888a5B08485eeF178f5a;
 
     function setUp() public {
-        inheritance = new Inheritance{value: 10 ether}(firstHeir, 10 ether);
+        inheritance = new Inheritance{value: 10 ether}(firstHeir);
         vm.deal(firstHeir, 100 ether);
     }
 

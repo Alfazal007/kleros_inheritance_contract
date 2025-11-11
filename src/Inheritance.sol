@@ -4,10 +4,8 @@ pragma solidity ^0.8.13;
 import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract Inheritance is Ownable {
-    error ZeroAmountNotAllowed();
     error ZeroAddressNotAllowedForHeir();
     error CannotBeOwnHeir();
-    error MismatchAmount();
     error EmptyHeir();
     error SameHeir();
     error InsufficientAmountInInheritance();
@@ -26,23 +24,19 @@ contract Inheritance is Ownable {
     address public heir;
     uint256 public lastInteractedAt;
 
-    constructor(address _heir, uint256 _inheritance_amount) Ownable(msg.sender) payable {
-        if(_inheritance_amount == 0) revert ZeroAmountNotAllowed();
+    constructor(address _heir) Ownable(msg.sender) payable {
         if(_heir == address(0)) revert ZeroAddressNotAllowedForHeir();
         if(msg.sender == _heir) revert CannotBeOwnHeir();
-        if(msg.value != _inheritance_amount) revert MismatchAmount();
-        inheritanceAmount = _inheritance_amount;
+        inheritanceAmount = msg.value;
         heir = _heir;
         lastInteractedAt = block.timestamp;
-        emit InheritanceCreated(msg.sender, heir, _inheritance_amount);
+        emit InheritanceCreated(msg.sender, heir, msg.value);
     }
 
-    function increaseInheritance(uint256 _increaseByAmount) public payable onlyOwner {
-        if(_increaseByAmount == 0) revert ZeroAmountNotAllowed();
-        if(msg.value != _increaseByAmount) revert MismatchAmount();
-        inheritanceAmount += _increaseByAmount;
+    function increaseInheritance() public payable onlyOwner {
+        inheritanceAmount += msg.value;
         lastInteractedAt = block.timestamp;
-        emit InheritanceIncreased(msg.sender, _increaseByAmount, inheritanceAmount);
+        emit InheritanceIncreased(msg.sender, msg.value, inheritanceAmount);
     }
 
     function updateHeir(address _newHeir) public onlyOwner {

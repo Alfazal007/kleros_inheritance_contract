@@ -11,7 +11,7 @@ contract UpdateHeirInheritanceTest is Test {
     address public secondHeir = 0x0BA0b7289DeD9E86D05E569Ba3d5056AaFE64070;
 
     function setUp() public {
-        inheritance = new Inheritance{value: 32}(firstHeir, 32);
+        inheritance = new Inheritance{value: 32}(firstHeir);
         vm.deal(firstHeir, 100 ether);
     }
 

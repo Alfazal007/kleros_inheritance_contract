@@ -12,7 +12,7 @@ contract InheritanceIncreaseTest is Test {
     address public secondHeir = 0x0BA0b7289DeD9E86D05E569Ba3d5056AaFE64070;
 
     function setUp() public {
-        inheritance = new Inheritance{value: 10 ether}(firstHeir, 10 ether);
+        inheritance = new Inheritance{value: 10 ether}(firstHeir);
         vm.deal(firstHeir, 100 ether);
         vm.deal(secondHeir, 100 ether);
     }
