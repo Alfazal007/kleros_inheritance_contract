@@ -1,66 +1,29 @@
-## Foundry
+# Inheritance Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This project implements a Solidity smart contract that manages an inheritance system.
+The contract allows the owner to withdraw Ether and resets an activity timer on interaction.
+If the owner remains inactive for more than 30 days, the heir can take ownership and assign a new heir.
 
-Foundry consists of:
+## Features
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- Owner can withdraw Ether, including 0 ETH, to reset the inactivity timer.
+- Owner can increase inheritance or update the heir at any time.
+- Heir can take ownership after 30 days of inactivity.
+- Direct payments are rejected to prevent unauthorized timer resets.
+- Emits events for all significant actions.
 
-## Documentation
+## Commands
 
-https://book.getfoundry.sh/
+To run tests and deploy the contract using Foundry:
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
+Run tests:
+```bash
+forge test
 ```
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+Deploy:
+```bash
+source .env && forge script script/Deploy.s.sol:DeployScript \
+  --rpc-url $SEPOLIA_RPC_URL --broadcast --verify \
+  --etherscan-api-key $ETHERSCAN_API_KEY --chain-id 11155111
 ```

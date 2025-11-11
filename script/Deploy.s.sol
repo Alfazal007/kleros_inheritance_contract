@@ -14,7 +14,3 @@ contract DeployScript is Script {
     }
 }
 
-/*
-    command to deploy and verify the smart contract
-    source .env && forge script script/Deploy.s.sol:DeployScript   --rpc-url $SEPOLIA_RPC_URL --broadcast --verify   --etherscan-api-key $ETHERSCAN_API_KEY --chain-id 11155111
-*/
